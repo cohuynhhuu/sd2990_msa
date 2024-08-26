@@ -10,17 +10,6 @@ pipeline {
         REPO_NAME = "sd2990_msa"
     }
     stages {
-        stage('Docker Build Frontend') {
-            agent any
-            steps {
-                withAWS(region:'ap-southeast-1',credentials:'aws-credential') {
-                    sh "aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${ECR_URI}"
-                    sh "docker build -t ${FRONTEND_APP}:${IMAGE_TAG} src/frontend/"
-                    sh "docker tag ${FRONTEND_APP}:${IMAGE_TAG} ${ECR_URI}/${FRONTEND_APP}:latest"
-                    sh "docker push ${ECR_URI}/${FRONTEND_APP}:latest"
-                }
-            }
-        }
         stage('Docker Build Backend') {
             agent any
             steps {
@@ -29,6 +18,18 @@ pipeline {
                     sh "docker build -t ${BACKEND_APP}:${IMAGE_TAG} src/backend/"
                     sh "docker tag ${BACKEND_APP}:${IMAGE_TAG} ${ECR_URI}/${BACKEND_APP}:latest"
                     sh "docker push ${ECR_URI}/${BACKEND_APP}:latest"
+                }
+            }
+        }
+        
+        stage('Docker Build Frontend') {
+            agent any
+            steps {
+                withAWS(region:'ap-southeast-1',credentials:'aws-credential') {
+                    sh "aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${ECR_URI}"
+                    sh "docker build -t ${FRONTEND_APP}:${IMAGE_TAG} src/frontend/"
+                    sh "docker tag ${FRONTEND_APP}:${IMAGE_TAG} ${ECR_URI}/${FRONTEND_APP}:latest"
+                    sh "docker push ${ECR_URI}/${FRONTEND_APP}:latest"
                 }
             }
         }
